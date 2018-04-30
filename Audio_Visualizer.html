@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Audio Visualizer</title>
+    <script src = "js/jquery-2.1.3.min.js"></script>
+    <style>
+      body{
+        font-family: 'Arial Unicode MS','Hiragino Kaku Gothic ProN','ヒラギノ角ゴ ProN W3','Arial',;
+        background-color:rgb(70, 70, 70);
+        color:white;
+      }
+
+        #visualizer{
+            background-color:rgb(29, 29, 29);
+        }
+        .sliders{
+          display:flex;
+          justify-content: space-around;
+          letter-spacing: 2px;
+        }
+    </style>
+  </head>
+  <body>
+    <canvas id="visualizer" width="600px" height="800px"></canvas>
+    <div class="sliders">
+    <input id="file" type="file">
+    pattern<input type="range" min="0" max="360" id="color">
+    size<input type="range" min="0" max="135" id="color_4">
+    circle 1<input type="range" min="1000" max="1800" id="color_2">
+    circle 2<input type="range" min="600" max="1400" id="color_3">
+    </div>
+    <div class="">
+
+    </div>
+    <p></p>
+    <script>
+        window.onload = function(){
+        var source, animationId;
+        var audioContext = new AudioContext;
+        var fileReader   = new FileReader;
+      　
+        var analyser = audioContext.createAnalyser();
+        analyser.fftSize = 1024;
+        analyser.connect(audioContext.destination);
+      　
+        var canvas        = document.getElementById('visualizer');
+        var canvasContext = canvas.getContext('2d');
+        canvas.setAttribute('width', analyser.frequencyBinCount * 3);
+        fileReader.onload = function(){
+          audioContext.decodeAudioData(fileReader.result, function(buffer){
+            if(source) {
+              source.stop();
+              cancelAnimationFrame(animationId);
+            }
+            source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(analyser);
+            source.start(0);
+            animationId = requestAnimationFrame(render);
+          });
+        };
+      　
+        document.getElementById('file').addEventListener('change', function(e){
+          fileReader.readAsArrayBuffer(e.target.files[0]);
+        });
+      　
+
+        render = function(){
+          spectrums = new Uint8Array(analyser.frequencyBinCount);
+          analyser.getByteFrequencyData(spectrums);
+          canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+          for(i=0, len=spectrums.length; i<len; i++){
+          canvasContext.beginPath();
+          hue = spectrums[i] + 135;
+          c = $("#color").val();
+          a = $("#color_2").val();
+          b = $("#color_3").val();
+          d = $("#color_4").val();
+          canvasContext.fillStyle = 'hsl(' + hue + ', 100%, 50%)';
+          canvasContext.arc(600, 600 - spectrums[i] * 2,d,0,Math.PI*2,false);
+          canvasContext.translate(parseInt(a / 2), parseInt(b / 2));
+          canvasContext.rotate(c * Math.PI / 180);
+
+          canvasContext.translate(parseInt(a / 2 * -1), parseInt(b / 2 * -1));
+          canvasContext.fill();
+          canvasContext.stroke();
+          }
+          animationId = requestAnimationFrame(render);
+        };
+      };
+    </script>
+  </body>
+</html>
