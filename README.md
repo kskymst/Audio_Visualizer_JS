@@ -1,8 +1,8 @@
 # Audio_Visualizer
 
 ![audio_visualizer](https://user-images.githubusercontent.com/33841025/39550110-2dd87ea2-4e9b-11e8-8280-04e0b8d379d9.gif)  
-※実際はもっと滑らかに動きます:)
 
+※実際はもっと滑らかに動きます:)
 
 ## Description
 
